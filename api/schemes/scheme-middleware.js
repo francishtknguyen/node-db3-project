@@ -29,20 +29,34 @@ const validateScheme = async (req, res, next) => {
     req.body = schemeValidation;
     next();
   } catch (err) {
-    next(err);
+    next({ status: 400, message: err.message });
   }
 };
+const stepSchema = yup.object({
+  instructions: yup
+    .string()
+    .trim()
+    .typeError("invalid step")
+    .min(1, "invalid step")
+    .required("invalid step"),
+  step_number: yup
+    .number()
+    .typeError("invalid step")
+    .min(1, "invalid step")
+    .required("invalid step"),
+});
 
-/*
-  If `instructions` is missing, empty string or not a string, or
-  if `step_number` is not a number or is smaller than one:
-
-  status 400
-  {
-    "message": "invalid step"
+const validateStep = async (req, res, next) => {
+  try {
+    const stepValidation = await stepSchema.validate(req.body, {
+      stripUnknown: true,
+    });
+    req.body = stepValidation;
+    next();
+  } catch (err) {
+    next({ status: 400, message: err.message });
   }
-*/
-const validateStep = (req, res, next) => {};
+};
 
 module.exports = {
   checkSchemeId,
