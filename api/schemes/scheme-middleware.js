@@ -14,47 +14,33 @@ const checkSchemeId = async (req, res, next) => {
 };
 
 const schemeSchema = yup.object({
-  scheme_name: yup
-    .string()
-    .trim()
-    .min(1, "invalid scheme_name")
-    .required("invalid scheme_name"),
+  scheme_name: yup.string().trim().required(),
 });
 
 const validateScheme = async (req, res, next) => {
   try {
-    const schemeValidation = await schemeSchema.validate(req.body, {
+    req.body = await schemeSchema.validate(req.body, {
       stripUnknown: true,
+      strict: true,
     });
-    req.body = schemeValidation;
     next();
   } catch (err) {
-    next({ status: 400, message: err.message });
+    next({ status: 400, message: "invalid scheme_name" });
   }
 };
 const stepSchema = yup.object({
-  instructions: yup
-    .string()
-    .trim()
-    .typeError("invalid step")
-    .min(1, "invalid step")
-    .required("invalid step"),
-  step_number: yup
-    .number()
-    .typeError("invalid step")
-    .min(1, "invalid step")
-    .required("invalid step"),
+  instructions: yup.string().trim().required(),
+  step_number: yup.number().min(0).required(),
 });
 
 const validateStep = async (req, res, next) => {
   try {
-    const stepValidation = await stepSchema.validate(req.body, {
+    req.body = await stepSchema.validate(req.body, {
       stripUnknown: true,
     });
-    req.body = stepValidation;
     next();
   } catch (err) {
-    next({ status: 400, message: err.message });
+    next({ status: 400, message: "invalid step" });
   }
 };
 

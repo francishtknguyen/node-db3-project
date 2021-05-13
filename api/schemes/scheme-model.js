@@ -17,17 +17,17 @@ async function findById(scheme_id) {
     .leftJoin("steps as st", "sc.scheme_id", "=", "st.scheme_id")
     .where("sc.scheme_id", scheme_id)
     .orderBy("st.step_number");
-  console.log(idArray);
 
+  if (!idArray.length) return null;
   const result = idArray.reduce((acc, step) => {
     const { scheme_name, instructions, step_id, step_number } = step;
     if (!step.step_id) {
       return { scheme_id, scheme_name, steps: [] };
     } else if (acc.steps) {
-      acc.steps.push({ scheme_id, scheme_name, instructions });
+      acc.steps.push({ step_id, step_number, instructions });
     } else {
       acc = {
-        scheme_id: scheme_id,
+        scheme_id: parseInt(scheme_id),
         scheme_name: scheme_name,
         steps: [{ instructions, step_id, step_number }],
       };
@@ -38,7 +38,12 @@ async function findById(scheme_id) {
 }
 
 function findSteps(scheme_id) {
-  return db("steps").where({ scheme_id }).orderBy("step_number");
+  return db
+    .select("sc.scheme_name", "st.instructions", "st.step_id", "step_number")
+    .from("schemes as sc")
+    .join("steps as st", "sc.scheme_id", "=", "st.scheme_id")
+    .where("sc.scheme_id", scheme_id)
+    .orderBy("step_number");
 }
 
 async function add(scheme) {
@@ -47,10 +52,11 @@ async function add(scheme) {
 }
 
 async function addStep(scheme_id, step) {
+  const { step_number, instructions } = step;
   await db("steps").insert({
-    step_number: step.step_number,
-    instructions: step.instructions,
-    scheme_id: scheme_id,
+    step_number,
+    instructions,
+    scheme_id,
   });
   return await findSteps(scheme_id);
 }
