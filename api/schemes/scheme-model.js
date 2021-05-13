@@ -19,7 +19,7 @@ async function findById(scheme_id) {
     .orderBy("st.step_number");
 
   const result = idArray.reduce((acc, step) => {
-    const { scheme_id, scheme_name, instructions, step_id, step_number } = step;
+    const { scheme_name, instructions, step_id, step_number } = step;
     if (acc.steps) {
       acc.steps.push({ scheme_id, scheme_name, instructions });
     } else {
@@ -32,9 +32,7 @@ async function findById(scheme_id) {
     return acc;
   }, {});
   return result;
-
   // 5B- This is what the result should look like _if there are no steps_ for a `scheme_id`:
-
   //   {
   //     "scheme_id": 7,
   //     "scheme_name": "Have Fun!",
@@ -46,11 +44,9 @@ function findSteps(scheme_id) {
   return db("steps").where({ scheme_id }).orderBy("step_number");
 }
 
-function add(scheme) {
-  // EXERCISE D
-  /*
-    1D- This function creates a new scheme and resolves to _the newly created scheme_.
-  */
+async function add(scheme) {
+  const [id] = await db("schemes").insert(scheme);
+  return db("schemes").where("scheme_id", id).first();
 }
 
 function addStep(scheme_id, step) {
